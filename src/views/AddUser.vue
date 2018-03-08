@@ -16,6 +16,7 @@ export default {
     return {
       newUser: {
         name: '',
+        age: '',
         email: '',
         city: ''
       }

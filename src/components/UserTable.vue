@@ -1,29 +1,22 @@
 <template>
   <div>
-    <h2>Total users: {{ userCount }}</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Name</th>
-          <th scope="col">E-mail</th>
-          <th scope="col">City</th>
-          <th scope="col"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="user in users" :key="user.id">
-          <th scope="row">{{ user.id }}</th>
-          <td> {{ user.name }} </td>
-          <td> {{ user.email }}</td>
-          <td> {{ user.city }}</td>
-          <td>
-            <button type="button" class="btn btn-primary" @click="editItem(user.id)">Edit</button>
-            <button type="button" class="btn btn-danger" @click="deleteItem(user.id)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <h2>Total users: {{ totalNumber }}</h2>
+    <user-table-pagination
+      :totalNumber="totalNumber"
+      :itemsOnPage="itemsOnPage"
+      :currentPage="currentPage"
+      @pass-current-page="receiveCurrentPage">
+    </user-table-pagination>
+
+    <user-table-select
+      :itemsOnPage="itemsOnPage"
+      @pass-items-on-page="receiveItemsOnPage">
+    </user-table-select>
+
+    <user-table-list 
+      :users="divideArray"
+      @reload-page="reloadTable">
+    </user-table-list>
   </div>
 </template>
 
@@ -32,6 +25,11 @@ import axios from 'axios'
 
 export default {
   name: 'user-table',
+  components: { 
+    UserTableList: () => import('@/components/UserTableList.vue'),
+    UserTablePagination: () => import('@/components/UserTablePagination.vue'),
+    UserTableSelect: () => import('@/components/UserTableSelect.vue'),
+    },
   props: {
     users: {
       type: Array,
@@ -39,20 +37,31 @@ export default {
     }
   },
   computed: {
-    userCount() {
+    totalNumber() {
       return this.users.length;
+    },
+    divideArray() {
+      let chunk = +this.itemsOnPage
+      let page = +this.currentPage
+      let formula = (1 + page*chunk)
+      return this.users.slice(formula-chunk, formula)
+    }
+  },
+  data() {
+    return {
+      itemsOnPage: '100',
+      currentPage: 1
     }
   },
   methods: {
-    deleteItem(val) {
-      axios.delete(`http://localhost:3000/users/${val}`)
-      .then(response => this.reloadTable())
-    },
-    editItem(val) {
-      this.$router.push({name: 'edit-user', params: {id: val}})
-    },
     reloadTable() {
       this.$emit('reload-page')
+    },
+    receiveCurrentPage(val) {
+      this.currentPage = val
+    },
+    receiveItemsOnPage(val) {
+      this.itemsOnPage = val
     }
   }
 }

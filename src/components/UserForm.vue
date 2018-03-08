@@ -6,6 +6,10 @@
         <input type="text" class="form-control" id="name" placeholder="Name" v-model="user.name">
       </div>
       <div class="form-group">
+        <label for="age">Age</label>
+        <input type="number" class="form-control" id="age" placeholder="Age" v-model="user.age">
+      </div>
+      <div class="form-group">
         <label for="email">E-mail</label>
         <input type="text" class="form-control" id="email" placeholder="E-mail" v-model="user.email">
       </div>
