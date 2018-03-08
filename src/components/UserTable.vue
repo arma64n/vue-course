@@ -1,13 +1,14 @@
 <template>
   <div>
-    <h2>Total users: {{ users.length }}</h2>
+    <h2>Total users: {{ userCount }}</h2>
     <table class="table">
       <thead>
         <tr>
-          <th scope="col">#</th>
+          <th scope="col">ID</th>
           <th scope="col">Name</th>
           <th scope="col">E-mail</th>
-          <th></th>
+          <th scope="col">City</th>
+          <th scope="col"></th>
         </tr>
       </thead>
       <tbody>
@@ -15,7 +16,11 @@
           <th scope="row">{{ user.id }}</th>
           <td> {{ user.name }} </td>
           <td> {{ user.email }}</td>
-          <td><button type="button" class="btn btn-danger" @click="deleteItem(user.id)">Delete</button></td>
+          <td> {{ user.city }}</td>
+          <td>
+            <button type="button" class="btn btn-primary" @click="editItem(user.id)">Edit</button>
+            <button type="button" class="btn btn-danger" @click="deleteItem(user.id)">Delete</button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -28,13 +33,23 @@ import axios from 'axios'
 export default {
   name: 'user-table',
   props: {
-    users: Array,
-    required: true
+    users: {
+      type: Array,
+      required: true
+    }
+  },
+  computed: {
+    userCount() {
+      return this.users.length;
+    }
   },
   methods: {
     deleteItem(val) {
       axios.delete(`http://localhost:3000/users/${val}`)
       .then(response => this.reloadTable())
+    },
+    editItem(val) {
+      this.$router.push({name: 'edit-user', params: {id: val}})
     },
     reloadTable() {
       this.$emit('reload-page')

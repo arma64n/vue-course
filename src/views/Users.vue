@@ -1,29 +1,30 @@
 <template>
   <div>
-    <add-user @reload-page="fetchData"/>
-    <user-table @reload-page="fetchData" :users="users"/>
+    <router-link :to="{name: 'add-user'}">
+      <button type="button" class="btn btn-success">Add user</button>
+    </router-link>
+    <user-table @reload-page="loadData" :users="users"/>
   </div>
 </template>
 
 <script>
-import AddUser from '@/components/AddUser'
-import UserTable from '@/components/UserTable'
+import axios from 'axios'
 
 export default {
-  components: { AddUser, UserTable }, 
+  name: 'users',
+  components: { UserTable: () => import('@/components/UserTable.vue') }, 
   data() {
     return {
       users: []
     }
   },
   created() {
-    this.fetchData();
+    this.loadData();
   },
   methods: {
-    fetchData() {      
-      fetch(`http://localhost:3000/users`)
-      .then(response => response.json())
-      .then(json => this.users = json)
+    loadData() {
+      axios.get(`http://localhost:3000/users`)
+      .then(response => this.users = response.data)
     }
   }
 }
