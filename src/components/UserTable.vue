@@ -1,18 +1,26 @@
 <template>
   <div>
-    <h2>Total users: {{ totalNumber }}</h2>
-    <user-table-pagination
-      :totalNumber="totalNumber"
-      :itemsOnPage="itemsOnPage"
-      :currentPage="currentPage"
-      @pass-current-page="receiveCurrentPage">
-    </user-table-pagination>
+    <h4 v-if="!searchItem">Total users: {{ totalNumber }}</h4>
+    <h4 v-else>Found users: {{ filterArray.length }} </h4>
+    <user-table-search 
+      @pass-search-item="receiveSearchItem">
+    </user-table-search>
 
-    <user-table-select
-      :itemsOnPage="itemsOnPage"
-      @pass-items-on-page="receiveItemsOnPage">
-    </user-table-select>
+    <div class="flex">
+      <user-table-pagination
+        :totalNumber="filterArray.length"
+        :itemsOnPage="itemsOnPage"
+        :currentPage="currentPage"
+        @pass-current-page="receiveCurrentPage"
+        @pass-start-page="currentPage = 1"
+        @pass-end-page="receiveEndPage">
+      </user-table-pagination>
 
+      <user-table-select
+        :itemsOnPage="itemsOnPage"
+        @pass-items-on-page="receiveItemsOnPage">
+      </user-table-select>
+    </div>
     <user-table-list 
       :users="divideArray"
       @reload-page="reloadTable">
@@ -29,6 +37,7 @@ export default {
     UserTableList: () => import('@/components/UserTableList.vue'),
     UserTablePagination: () => import('@/components/UserTablePagination.vue'),
     UserTableSelect: () => import('@/components/UserTableSelect.vue'),
+    UserTableSearch: () => import('@/components/UserTableSearch.vue')
     },
   props: {
     users: {
@@ -40,17 +49,21 @@ export default {
     totalNumber() {
       return this.users.length;
     },
+    filterArray() {
+      return this.users.filter(x => x.name.toLowerCase().includes(this.searchItem.toLowerCase()))
+    },
     divideArray() {
       let chunk = +this.itemsOnPage
       let page = +this.currentPage
-      let formula = (1 + page*chunk)
-      return this.users.slice(formula-chunk, formula)
+      let formula = page*chunk
+      return this.filterArray.slice(formula-chunk, formula)
     }
   },
   data() {
     return {
       itemsOnPage: '100',
-      currentPage: 1
+      currentPage: 1,
+      searchItem: ''
     }
   },
   methods: {
@@ -58,11 +71,25 @@ export default {
       this.$emit('reload-page')
     },
     receiveCurrentPage(val) {
+      this.currentPage = +val
+    },
+    receiveEndPage(val) {
       this.currentPage = val
     },
     receiveItemsOnPage(val) {
       this.itemsOnPage = val
+    },
+    receiveSearchItem(val) {
+      this.searchItem = val
     }
   }
 }
 </script>
+
+<style>
+.flex {
+  display: flex;
+  justify-content: space-between;
+  margin: 1em 0;
+}
+</style>
